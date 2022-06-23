@@ -30,6 +30,8 @@
     "axios": "^0.27.2",
     "basiclightbox": "^5.0.4",
     "loader": "^2.1.1",
+    "perfect-scrollbar": "^1.5.5",
+    "smooth-scrollbar": "^8.7.4",
     "vanilla-back-to-top": "^7.2.1"
   }
 }
