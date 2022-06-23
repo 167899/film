@@ -1,137 +1,96 @@
-import makeHeader from "./heder-my-liberary";
-import initPagination from "./pagination";
-import { getWatched } from "./tmdb";
-import { initHome } from "./trending.js";
-import filmCardsTpl from "../templates/films-cards.js";
-import { filmTitleDark } from "./dark_theme";
-import { renderPage } from "./my-liberary-render";
+import makeHeader from './heder-my-liberary';
+import initPagination from './pagination';
+import { getWatched } from './tmdb';
+import { initHome } from './trending.js';
+import filmCardsTpl from '../templates/films-cards.js';
+import { filmTitleDark } from './dark_theme';
+import { renderPage } from './my-liberary-render';
 
 export const refs = {
-  logoLink: document.querySelector(".logo"),
-  homeLink: document.querySelector(".nav__link-home"),
-  myLibraryLink: document.querySelector(".nav__link-library"),
-  moviesList: document.querySelector(".films__list"),
-  switcher: document.querySelector(".switcher"),
+  logoLink: document.querySelector('.logo'),
+  homeLink: document.querySelector('.nav__link-home'),
+  myLibraryLink: document.querySelector('.nav__link-library'),
+  moviesList: document.querySelector('.films__list'),
+  switcher: document.querySelector('.switcher'),
 };
-let pathname = "";
+let pathname = '';
 
-refs.logoLink.addEventListener("click", (e) => e.preventDefault());
-refs.homeLink.addEventListener("click", (e) => e.preventDefault());
-refs.myLibraryLink.addEventListener("click", onClickMyLibraryLink);
+refs.logoLink.addEventListener('click', e => e.preventDefault());
+refs.homeLink.addEventListener('click', e => e.preventDefault());
+refs.myLibraryLink.addEventListener('click', onClickMyLibraryLink);
 
 function onClickMyLibraryLink(event) {
-  refs.logoLink.addEventListener("click", onClickHomeLink);
-  refs.homeLink.addEventListener("click", onClickHomeLink);
+  refs.logoLink.addEventListener('click', onClickHomeLinkFromLibrary);
+  refs.homeLink.addEventListener('click', onClickHomeLinkFromLibrary);
   event.preventDefault();
-  refs.homeLink.parentElement.classList.remove("nav__item--active");
-  refs.myLibraryLink.parentElement.classList.add("nav__item--active");
-  refs.switcher.classList.add("visually-hidden");
-  makeHeader("library");
-
-  window.history.pushState("object or string", "Title", "/mylibrary");
-  refs.moviesList.innerHTML = "";
+  refs.homeLink.parentElement.classList.remove('nav__item--active');
+  refs.myLibraryLink.parentElement.classList.add('nav__item--active');
+  refs.switcher.classList.add('visually-hidden');
+  makeHeader('library');
+  if (!(event.type === 'popstate')) {
+    const libraryPath = pathname + 'mylibrary';
+    window.history.pushState('object or string', 'Title', libraryPath);
+  }
+  refs.moviesList.innerHTML = '';
   initPagination(getWatched, renderPage);
   if (getWatched().movies.length > 0) {
-    document.querySelector(".removeBtn").classList.remove("visually-hidden");
+    document.querySelector('.removeBtn').classList.remove('visually-hidden');
   }
-
+  refs.moviesList.classList.add('films__list--library');
   filmTitleDark();
-  refs.logoLink.style.cursor = "pointer";
+  refs.logoLink.style.cursor = 'pointer';
 }
 
-function onClickHomeLink(event) {
-  event.preventDefault();
-  refs.homeLink.parentElement.classList.add("nav__item--active");
-  refs.myLibraryLink.parentElement.classList.remove("nav__item--active");
-
-  makeHeader("home");
-
-  window.history.pushState("object or string", "Title", pathname);
-  refs.homeLink.removeEventListener("click", onClickHomeLink);
-  refs.logoLink.removeEventListener("click", onClickHomeLink);
-  refs.switcher.classList.remove("visually-hidden");
-  refs.moviesList.innerHTML = "";
-  document.querySelector(".search__input").value = "";
-  filmTitleDark();
-  initHome();
-  refs.logoLink.style.cursor = "default";
+function onClickHomeLinkFromLibrary(event) {
+  refs.homeLink.parentElement.classList.add('nav__item--active');
+  refs.myLibraryLink.parentElement.classList.remove('nav__item--active');
+  makeHeader('home');
+  if (!(event.type === 'popstate')) {
+    let headerPath;
+    window.history.pushState('object or string', 'Title', pathname);
+  }
+  onClickHomeOfLink(event);
+  refs.moviesList.classList.remove('films__list--library');
 }
 
 function onClickHomeOfLink(event) {
   event.preventDefault();
-  refs.homeLink.removeEventListener("click", onClickHomeOfLink);
-  refs.logoLink.removeEventListener("click", onClickHomeOfLink);
-  refs.switcher.classList.remove("visually-hidden");
-  refs.moviesList.innerHTML = "";
-  document.querySelector(".search__input").value = "";
+  refs.homeLink.removeEventListener('click', onClickHomeOfLink);
+  refs.logoLink.removeEventListener('click', onClickHomeOfLink);
+  refs.switcher.classList.remove('visually-hidden');
+  refs.moviesList.innerHTML = '';
+  document.querySelector('.search__input').value = '';
   filmTitleDark();
   initHome();
-  refs.logoLink.style.cursor = "default";
+  refs.logoLink.style.cursor = 'default';
 }
 
-window.addEventListener("load", (event) => {
-  if (!location.href.includes("mylibrary")) {
+window.addEventListener('load', event => {
+  event.preventDefault();
+  if (!location.href.includes('mylibrary')) {
     pathname = location.pathname;
   }
-  console.log(pathname);
-  if (location.href.includes("mylibrary")) {
-    window.history.pushState("object or string", "Title", pathname);
+  if (location.href.includes('mylibrary')) {
+    let newLocation = location.href.replace('mylibrary', '');
+    location.replace(newLocation);
     onClickMyLibraryLink(event);
   }
 });
 
-window.addEventListener("popstate", (e) => {
-  if (window.location.pathname === "/") {
-    e.preventDefault();
-    refs.homeLink.parentElement.classList.add("nav__item--active");
-    refs.myLibraryLink.parentElement.classList.remove("nav__item--active");
+window.addEventListener('beforeunload', event => {
+  // if (location.href.includes('mylibrary')) {
+  //   newLocation = location.href.replace('mylibrary', '');
+  //   location.replace = newLocation;
+  //   onClickMyLibraryLink(event);
+  // }
+});
 
-    makeHeader("home");
-
-    refs.homeLink.removeEventListener("click", onClickHomeLink);
-    refs.logoLink.removeEventListener("click", onClickHomeLink);
-    refs.switcher.classList.remove("visually-hidden");
-    refs.moviesList.innerHTML = "";
-    document.querySelector(".search__input").value = "";
-    filmTitleDark();
-    initHome();
-    refs.logoLink.style.cursor = "default";
-    console.log("heder");
-  } else if (window.location.pathname === "/mylibrary") {
-    e.preventDefault();
-    refs.logoLink.addEventListener("click", onClickHomeLink);
-    refs.homeLink.addEventListener("click", onClickHomeLink);
-    refs.homeLink.parentElement.classList.remove("nav__item--active");
-    refs.myLibraryLink.parentElement.classList.add("nav__item--active");
-    refs.switcher.classList.add("visually-hidden");
-    makeHeader("library");
-
-    refs.moviesList.innerHTML = "";
-    initPagination(getWatched, renderPageLibrary);
-
-    filmTitleDark();
-    refs.logoLink.style.cursor = "pointer";
-    console.log("library");
+window.addEventListener('popstate', e => {
+  if (window.location.pathname === pathname) {
+    onClickHomeLinkFromLibrary(e);
+  } else if (window.location.pathname.includes('/mylibrary')) {
+    onClickMyLibraryLink(e);
   }
 });
 
-if (window.location.pathname === "/mylibrary") {
-  // e.preventDefault();
-  refs.logoLink.addEventListener("click", onClickHomeLink);
-  refs.homeLink.addEventListener("click", onClickHomeLink);
-  refs.homeLink.parentElement.classList.remove("nav__item--active");
-  refs.myLibraryLink.parentElement.classList.add("nav__item--active");
-  refs.switcher.classList.add("visually-hidden");
-  makeHeader("library");
-
-  refs.moviesList.innerHTML = "";
-  // initPagination(getWatched, renderPageLibrary);
-
-  filmTitleDark();
-  refs.logoLink.style.cursor = "pointer";
-  console.log("library");
-}
-
 export default onClickHomeOfLink;
-
-// window.addEventListener('');
